@@ -21,7 +21,7 @@ export default function TokenBar() {
 
   return (
     <div
-      className="px-4 py-2 bg-card cursor-pointer select-none"
+      className="shrink-0 px-4 py-2.5 bg-card border-b border-border cursor-pointer select-none"
       onClick={() => setExpanded(!expanded)}
     >
       <div className="flex items-center gap-3">

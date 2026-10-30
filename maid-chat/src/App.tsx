@@ -7,7 +7,6 @@ import {
   useMessagePartText,
   useMessagePartImage,
 } from '@assistant-ui/react';
-import { Group, Panel, Separator } from 'react-resizable-panels';
 import { MaidRuntimeProvider } from './lib/RuntimeProvider';
 import StatusBar from './components/StatusBar';
 import TokenBar from './components/TokenBar';
@@ -463,27 +462,23 @@ function HistoryModal({ open, onClose }: { open: boolean; onClose: () => void })
   );
 }
 
-// AssistantSidebar 布局：左侧控制面板（宽），右侧聊天（窄）
-function AssistantSidebar({ onOpenHistory }: { onOpenHistory: () => void }) {
+// 主布局：顶部状态栏 + 居中的聊天列
+function ChatLayout({ onOpenHistory }: { onOpenHistory: () => void }) {
   return (
-    <Group orientation="horizontal" className="h-full">
-      <Panel
-        defaultSize={70}
-        minSize={30}
-        className="flex flex-col bg-card border-r border-border"
-      >
-        <StatusBar onOpenHistory={onOpenHistory} />
-        <div className="mt-auto border-t border-border">
+    <div className="flex h-full flex-col">
+      {/* 顶栏：占满整行，内容与聊天列对齐 */}
+      <StatusBar onOpenHistory={onOpenHistory} />
+
+      {/* 聊天区：居中，左右不再留大块空白 */}
+      <div className="flex min-h-0 flex-1 justify-center bg-muted/30">
+        <ThreadPrimitive.Root className="flex w-full max-w-3xl flex-col overflow-hidden border-x border-border bg-background">
+          {/* 上下文用量放在聊天界面顶部 */}
           <TokenBar />
-        </div>
-      </Panel>
-      <Separator className="w-1 bg-border hover:bg-muted-foreground/50 transition-colors" />
-      <Panel defaultSize={40} minSize={30}>
-        <ThreadPrimitive.Root className="flex-1 flex flex-col h-full overflow-hidden">
+
           <ThreadPrimitive.Viewport className="flex-1 overflow-y-auto py-4">
             <AuiIf condition={(s) => s.thread.isEmpty}>
-              <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
-                点击左侧「启动」开始对话
+              <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+                点击顶部「启动」开始对话
               </div>
             </AuiIf>
             <ThreadPrimitive.Messages>
@@ -504,12 +499,13 @@ function AssistantSidebar({ onOpenHistory }: { onOpenHistory: () => void }) {
               }}
             </ThreadPrimitive.Messages>
           </ThreadPrimitive.Viewport>
+
           <WaitingIndicator />
           <PendingMessages />
           <Composer />
         </ThreadPrimitive.Root>
-      </Panel>
-    </Group>
+      </div>
+    </div>
   );
 }
 
@@ -517,8 +513,8 @@ export default function App() {
   const [historyOpen, setHistoryOpen] = useState(false);
   return (
     <MaidRuntimeProvider>
-      <div className="h-screen flex bg-background text-foreground">
-        <AssistantSidebar onOpenHistory={() => setHistoryOpen(true)} />
+      <div className="flex h-screen flex-col bg-background text-foreground">
+        <ChatLayout onOpenHistory={() => setHistoryOpen(true)} />
         <ShutdownAlert />
         <BlockAlert />
         <HistoryModal open={historyOpen} onClose={() => setHistoryOpen(false)} />
